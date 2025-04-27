@@ -12,7 +12,7 @@ Note: It is only for Debian based systems which use GNOME (Other DEs will be add
 - Sends a desktop notification.
 
 ## Usage
-1) Download the .deb file [DEB File][https://github.com/PunVas/pOCR/blob/main/pOCR-1.0.deb]
+1) Download the .deb file [DEB File](https://github.com/PunVas/pOCR/blob/main/pOCR-1.0.deb)
 2) run  
     ```bash
     sudo dpkg -i pOCR-1.0.deb
