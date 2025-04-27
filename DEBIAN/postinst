@@ -2,10 +2,8 @@
 
 set -e
 
-# Initialize
 goto_manual_instructions=false
 
-# Ensure we know which user to apply gsettings for
 USER_TO_RUN="${SUDO_USER:-$(logname)}"
 
 if ! command -v gsettings &> /dev/null; then
@@ -23,7 +21,6 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
     echo "This is normal when running from a package installation script."
 fi
 
-# Check if gsettings schema is available
 schema_check=$(sudo -u "$USER_TO_RUN" gsettings list-schemas | grep -c "org.gnome.settings-daemon.plugins.media-keys" || echo "0")
 if [ "$schema_check" -eq 0 ]; then
     echo "Required GSettings schema not found. Automatic shortcut setup cannot continue."
@@ -38,18 +35,14 @@ CUSTOM_SCHEMA="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding"
 CUSTOM_SHORTCUT_ID="custom-pocr"
 CUSTOM_KEYBINDING_PATH="$CUSTOM_PATH/$CUSTOM_SHORTCUT_ID/"
 
-# Fetch current custom bindings
 current_bindings=$(sudo -u "$USER_TO_RUN" gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo "[]")
 
-# Add binding if not already present
 if [[ "$current_bindings" != *"$CUSTOM_KEYBINDING_PATH"* ]]; then
     echo "Custom keybinding not found in current list. Attempting to add it."
 
-    # Clean brackets and split existing list into array
     list_content=$(echo "$current_bindings" | sed "s/^\[//; s/\]$//" | tr "," "\n" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//")
     new_list=()
 
-    # Deduplicate existing entries
     for entry in $list_content; do
         clean_entry=$(echo "$entry" | sed "s/'//g")
         if [[ "$clean_entry" != "$CUSTOM_KEYBINDING_PATH" && -n "$clean_entry" ]]; then
@@ -57,10 +50,8 @@ if [[ "$current_bindings" != *"$CUSTOM_KEYBINDING_PATH"* ]]; then
         fi
     done
 
-    # Add our new custom shortcut path
     new_list+=("'$CUSTOM_KEYBINDING_PATH'")
 
-    # Rebuild array
     new_bindings="[${new_list[*]}]"
 
     if ! sudo -u "$USER_TO_RUN" gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$new_bindings" 2>/dev/null; then
@@ -73,7 +64,6 @@ else
     echo "Custom keybinding already exists in the list."
 fi
 
-# Set keybinding properties
 if [ "$goto_manual_instructions" != "true" ]; then
     if ! sudo -u "$USER_TO_RUN" gsettings set "$CUSTOM_SCHEMA:$CUSTOM_KEYBINDING_PATH" name "$SHORTCUT_NAME" 2>/dev/null || \
        ! sudo -u "$USER_TO_RUN" gsettings set "$CUSTOM_SCHEMA:$CUSTOM_KEYBINDING_PATH" command "$SHORTCUT_COMMAND" 2>/dev/null || \
@@ -93,7 +83,6 @@ if [ "$goto_manual_instructions" != "true" ]; then
     fi
 fi
 
-# Create desktop file for completeness
 mkdir -p /usr/share/applications
 cat > /usr/share/applications/pocr.desktop << EOF
 [Desktop Entry]
