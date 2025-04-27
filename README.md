@@ -2,18 +2,14 @@
 
 **pOCR** (personal OCR) is a simple Bash script to quickly capture a selected area of your screen, extract text using OCR (Tesseract), and copy it directly to your clipboard.
 
+Note: It is only for Debian based systems which use GNOME (Other DEs will be added in future upgrades. Stay tuned...)
+
+
 ## Features
 - Select any part of your screen.
 - Extract text from the selected screenshot.
 - Automatically copies the text to clipboard.
-- Sends a desktop notification (optional).
-
-## Requirements
-- `slop` (for area selection)
-- `scrot` (for taking the screenshot)
-- `tesseract` (for OCR)
-- `xclip` (for clipboard copy)
-- (Optional) `notify-send` (for notification)
+- Sends a desktop notification.
 
 ## Usage
 1) Download the .deb file
@@ -32,3 +28,8 @@
     After that, you can use Shift+Print Screen!
     =====================
    ```
+
+   4)If still any error occurs, run this to reset the keybinds
+   ```bash
+   gsettings reset org.gnome.settings-daemon.plugins.media-keys custom-keybindings
+    ```
