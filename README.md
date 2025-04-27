@@ -1,5 +1,7 @@
 # pOCR
 
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=PunVas.pOCR)
+
 **pOCR** (personal OCR) is a simple tool to quickly capture a selected area of your screen, extract text using OCR (Tesseract), and copy it directly to your clipboard.
 
 Note: It is only for Debian based systems which use GNOME (Other DEs will be added in future upgrades. Thand rakho add ho jayega. Stay tuned...)
