@@ -1,6 +1,6 @@
 # pOCR
 
-![Visitors](https://visitor-badge.laobi.icu/badge?page_id=PunVas.pOCR)
+![Repo Views](https://img.shields.io/badge/dynamic/json?color=informational&label=Views&query=value&url=https%3A%2F%2Fapi.countapi.xyz%2Fget%2Fpunvas-pocr%2Fvisits)
 
 **pOCR** (personal OCR) is a simple tool to quickly capture a selected area of your screen, extract text using OCR (Tesseract), and copy it directly to your clipboard.
 
