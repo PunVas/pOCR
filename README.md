@@ -24,12 +24,11 @@
 3) If keybindings get set automatically, just use Shift+Print, else follow the instructions on  the terminal
    ```bash
    =====================
-INSTALL COMPLETE!
-Please run the following command once to setup the shortcut:
+    INSTALL COMPLETE!
+    Please run the following command once to setup the shortcut:
 
     /usr/local/bin/pocr-setup-shortcut.sh
 
-After that, you can use Shift+Print Screen!
-=====================
-
+    After that, you can use Shift+Print Screen!
+    =====================
    ```
