@@ -33,3 +33,10 @@ Note: It is only for Debian based systems which use GNOME (Other DEs will be add
    ```bash
    gsettings reset org.gnome.settings-daemon.plugins.media-keys custom-keybindings
     ```
+
+   5) My future plans for this repo
+      - A custom screenshot tool
+      - Adding GitHub Actions to get releases automatically
+      - Adding support for more distros
+      - Adding support for more langs.
+      - Suggestions by users...
