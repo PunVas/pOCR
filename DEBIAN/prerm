@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -e
+
+if ! command -v gsettings &> /dev/null; then
+    echo "gsettings command not found. Automatic shortcut cleanup skipped."
+    exit 0
+fi
+
+CUSTOM_KEYBINDING_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom-pocr/"
+
+current_bindings=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
+
+if [[ "$current_bindings" == *"$CUSTOM_KEYBINDING_PATH"* ]]; then
+
+    new_bindings=$(echo "$current_bindings" | sed "s/, '$CUSTOM_KEYBINDING_PATH'//; s/'$CUSTOM_KEYBINDING_PATH', //; s/\[ '$CUSTOM_KEYBINDING_PATH' \]/\\[\\]/")
+    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$new_bindings"
+    echo "Removed '$CUSTOM_KEYBINDING_PATH' from custom keybindings list."
+else
+    echo "'$CUSTOM_KEYBINDING_PATH' not found in custom keybindings list. Cleanup skipped."
+fi
+
+exit 0

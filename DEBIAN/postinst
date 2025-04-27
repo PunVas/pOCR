@@ -1,0 +1,126 @@
+#!/bin/bash
+
+set -e
+
+# Initialize
+goto_manual_instructions=false
+
+# Ensure we know which user to apply gsettings for
+USER_TO_RUN="${SUDO_USER:-$(logname)}"
+
+if ! command -v gsettings &> /dev/null; then
+    echo "gsettings command not found. Automatic shortcut setup skipped."
+    echo "Please manually configure the 'Shift+Print' shortcut to run '/usr/local/bin/pocr.sh'."
+    exit 0
+fi
+
+SHORTCUT_NAME="pOCR Screenshot and Extract"
+SHORTCUT_COMMAND="/usr/local/bin/pocr.sh"
+SHORTCUT_BINDING="<Shift>Print"
+
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    echo "No DBUS session detected. Shortcut setup will likely fail."
+    echo "This is normal when running from a package installation script."
+fi
+
+# Check if gsettings schema is available
+schema_check=$(sudo -u "$USER_TO_RUN" gsettings list-schemas | grep -c "org.gnome.settings-daemon.plugins.media-keys" || echo "0")
+if [ "$schema_check" -eq 0 ]; then
+    echo "Required GSettings schema not found. Automatic shortcut setup cannot continue."
+    echo "Please manually configure the shortcut as described below."
+    goto_manual_instructions=true
+else
+    echo "GSettings schema found. Attempting to configure shortcut..."
+fi
+
+CUSTOM_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
+CUSTOM_SCHEMA="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding"
+CUSTOM_SHORTCUT_ID="custom-pocr"
+CUSTOM_KEYBINDING_PATH="$CUSTOM_PATH/$CUSTOM_SHORTCUT_ID/"
+
+# Fetch current custom bindings
+current_bindings=$(sudo -u "$USER_TO_RUN" gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo "[]")
+
+# Add binding if not already present
+if [[ "$current_bindings" != *"$CUSTOM_KEYBINDING_PATH"* ]]; then
+    echo "Custom keybinding not found in current list. Attempting to add it."
+
+    # Clean brackets and split existing list into array
+    list_content=$(echo "$current_bindings" | sed "s/^\[//; s/\]$//" | tr "," "\n" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//")
+    new_list=()
+
+    # Deduplicate existing entries
+    for entry in $list_content; do
+        clean_entry=$(echo "$entry" | sed "s/'//g")
+        if [[ "$clean_entry" != "$CUSTOM_KEYBINDING_PATH" && -n "$clean_entry" ]]; then
+            new_list+=("'$clean_entry'")
+        fi
+    done
+
+    # Add our new custom shortcut path
+    new_list+=("'$CUSTOM_KEYBINDING_PATH'")
+
+    # Rebuild array
+    new_bindings="[${new_list[*]}]"
+
+    if ! sudo -u "$USER_TO_RUN" gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$new_bindings" 2>/dev/null; then
+        echo "Warning: Failed to update custom keybindings list."
+        goto_manual_instructions=true
+    else
+        echo "Successfully added custom keybinding to the list."
+    fi
+else
+    echo "Custom keybinding already exists in the list."
+fi
+
+# Set keybinding properties
+if [ "$goto_manual_instructions" != "true" ]; then
+    if ! sudo -u "$USER_TO_RUN" gsettings set "$CUSTOM_SCHEMA:$CUSTOM_KEYBINDING_PATH" name "$SHORTCUT_NAME" 2>/dev/null || \
+       ! sudo -u "$USER_TO_RUN" gsettings set "$CUSTOM_SCHEMA:$CUSTOM_KEYBINDING_PATH" command "$SHORTCUT_COMMAND" 2>/dev/null || \
+       ! sudo -u "$USER_TO_RUN" gsettings set "$CUSTOM_SCHEMA:$CUSTOM_KEYBINDING_PATH" binding "$SHORTCUT_BINDING" 2>/dev/null; then
+
+        if ! sudo -u "$USER_TO_RUN" gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_KEYBINDING_PATH" name "$SHORTCUT_NAME" 2>/dev/null || \
+           ! sudo -u "$USER_TO_RUN" gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_KEYBINDING_PATH" command "$SHORTCUT_COMMAND" 2>/dev/null || \
+           ! sudo -u "$USER_TO_RUN" gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_KEYBINDING_PATH" binding "$SHORTCUT_BINDING" 2>/dev/null; then
+
+            echo "Failed to set shortcut properties with multiple schema formats."
+            goto_manual_instructions=true
+        else
+            echo "Successfully configured shortcut with alternative schema format."
+        fi
+    else
+        echo "Successfully configured shortcut."
+    fi
+fi
+
+# Create desktop file for completeness
+mkdir -p /usr/share/applications
+cat > /usr/share/applications/pocr.desktop << EOF
+[Desktop Entry]
+Name=pOCR Screenshot and Extract
+Comment=Take screenshot and extract text with OCR
+Exec=/usr/local/bin/pocr.sh
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=screenshot;ocr;text;extract;
+NoDisplay=true
+EOF
+
+echo ""
+echo "Setup finished!"
+if [ "$goto_manual_instructions" = "true" ]; then
+    echo ""
+    echo "====================="
+    echo "INSTALL COMPLETE!"
+    echo "Please run the following command once to setup the shortcut:"
+    echo ""
+    echo "    /usr/local/bin/pocr-setup-shortcut.sh      "
+    echo ""
+    echo "After that, you can use Shift+Print Screen!"
+    echo "====================="
+else
+    echo "Shortcut set successfully!"
+fi
+
+exit 0

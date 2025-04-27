@@ -1,0 +1,15 @@
+Package: pocr
+Version: 1.0
+Architecture: all
+Maintainer: Puneet Vaswani puneetvaswani0609@gmail.com
+Installed-Size: 100
+Depends: slop, scrot, tesseract-ocr-eng, xclip, gsettings-backend, libnotify-bin
+Section: utils
+Priority: optional
+Description: A simple tool to capture a screen region, perform OCR, and copy text to clipboard.
+ This package provides a utility called pOCR that allows users to select
+ a screen area using the mouse, perform Optical Character Recognition (OCR)
+ on the captured image using Tesseract, and automatically copy the extracted
+ text to the system clipboard. It is designed to be triggered by a keyboard
+ shortcut, which is automatically configured for GNOME-based desktop
+ environments upon installation.
