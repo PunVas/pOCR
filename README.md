@@ -38,6 +38,6 @@ Note: It is only for Debian based systems which use GNOME (Other DEs will be add
    5) My future plans for this repo
       - A custom screenshot tool
       - Adding GitHub Actions to get releases automatically
-      - Adding support for more distros
+      - Adding support for major distros and DEs.
       - Adding support for more langs.
       - Suggestions by users...
